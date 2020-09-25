@@ -1,0 +1,35 @@
+module VGADemo(
+    input clk_100,
+    output clk_25,
+    output reg [2:0] pixel,
+    output hsync_out,
+    output vsync_out
+);
+    wire inDisplayArea;
+    wire [9:0] CounterX;
+
+    hvsync_generator hvsync(
+      .clk(clk_25),
+      .vga_h_sync(hsync_out),
+      .vga_v_sync(vsync_out),
+      .CounterX(CounterX),
+      //.CounterY(CounterY),
+      .inDisplayArea(inDisplayArea)
+    );
+    
+    // wrapper for clock divider
+    Clock_Divider wrapper (
+        .clk_100(clk_100),
+        .clk_25(clk_25)
+    );
+
+
+    always @(posedge clk_25)
+    begin
+      if (inDisplayArea)
+        pixel <= CounterX[9:6];
+      else // if it's not to display, go dark
+        pixel <= 3'b000;
+    end
+
+endmodule
